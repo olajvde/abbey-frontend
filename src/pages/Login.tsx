@@ -31,13 +31,12 @@ const Login = () => {
       const {data, error}= await login(body)
 
       if(error){
-        // console.log(error)
+        console.log(error)
 
-        toast.error(error?.data?.statusMessage)
+       return toast.error(error?.data?.statusMessage)
       }
 
       toast.success('Login successful')
-      // console.log(data.data)
 
       sessionStorage.setItem('user_token', data.data.access_token)
       sessionStorage.setItem('user', JSON.stringify(data.data.user))

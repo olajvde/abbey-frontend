@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useEffect } from "react";
 import AccountCard from "../components/AccountCard";
 import Navbar from "../components/Navbar";
+import { useFetchAccountsQuery } from "../api/accountsSlice";
 
 interface CustomerAccount {
   id: string;
@@ -29,8 +30,9 @@ interface CustomerDetails {
 
 
 export default function Dashboard() {
+  const {data:accounts, error} = useFetchAccountsQuery(0)
   const [isEmpty, setIsEmpty] = React.useState(false);
-
+  const [accountsToRender, setAccountsToRender] = React.useState<CustomerAccount[]>([])
   const customer: CustomerDetails = JSON.parse(
     sessionStorage.getItem("user") || "{}"
   );
@@ -39,6 +41,18 @@ export default function Dashboard() {
   if (customer?.customerAccounts?.length < 1) {
     setIsEmpty(true);
   }
+
+  useEffect(() => {
+      // console.log(accounts)
+      if (accounts && accounts?.data?.length === 0) {
+        setIsEmpty(true);
+      } else {
+        setAccountsToRender(accounts?.data)
+        setIsEmpty(false);
+
+      }
+  }, [accounts])
+  
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
@@ -51,7 +65,7 @@ export default function Dashboard() {
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {customer.customerAccounts.map((acc, i) => (
+          {accountsToRender?.map((acc, i) => (
             <AccountCard key={i} {...acc} balance={parseFloat(acc.balance.replace(/[^\d.-]/g, ""))} />
           ))}
         </div>

@@ -10,6 +10,7 @@ import {
     prepareHeaders: (headers: Headers, api: Pick<BaseQueryApi, "getState">) => {
       // If the token exists, set it in the Authorization header
       if (user_token) {
+        // console.log("User token:", user_token);
         headers.set("Authorization", `Bearer ${user_token}`);
       }
   
@@ -24,30 +25,35 @@ import {
     tagTypes: ["accounts"],
   
     endpoints: (builder) => ({
-      login: builder.mutation({
+      createAccount: builder.mutation({
         query: (body) => ({
-          url: "/auth/login",
+          url: "/accounts/create-account",
           method: "POST",
           body,
         }),
       }),
-      register: builder.mutation({
-        query: (body) => ({
-          url: "/auth/register",
-          method: "POST",
-          body,
+      fetchAccounts: builder.query({
+        query: () => ({
+          url: "/accounts/fetch-accounts",
+          method: "GET",
+          // body,
         }),
+        providesTags : ["accounts"]
+        // invalidatesTags removed as it is not valid for query endpoints
       }),
   
-      logout: builder.mutation({
+      fetchOfficers: builder.query({
         query: () => ({
-          url: "/auth/logout",
-          method: "POST",
+          url: "/accounts/fetch-officers",
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${user_token}`, // Add user token here
+          },
         }),
       }),
     }),
   });
   
-  export const { useLoginMutation, useRegisterMutation, useLogoutMutation } =
+  export const { useCreateAccountMutation, useFetchAccountsQuery, useFetchOfficersQuery } =
     accountsSlice;
   

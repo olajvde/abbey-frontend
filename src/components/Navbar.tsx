@@ -1,5 +1,8 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
+import { useFetchOfficersQuery,useCreateAccountMutation } from "../api/accountsSlice";
+import { toast } from "sonner";
+import { useLogoutMutation } from "../api/authSlice";
 
 interface CustomerAccount {
   id: string;
@@ -25,8 +28,13 @@ interface CustomerDetails {
   customerAccounts: CustomerAccount[];
 }
 const Navbar = () => {
+  const [createAccount] = useCreateAccountMutation()
+  const [logout] = useLogoutMutation()
   const [isEmpty, setIsEmpty] = React.useState(false);
   const [showModal, setShowModal] = React.useState(false);
+  const [officerId, setOfficerId] = React.useState("");
+  const [accountType, setAccountType] = React.useState("");
+  const { data: officers, isLoading } = useFetchOfficersQuery(0);
   const customer: CustomerDetails = JSON.parse(
     sessionStorage.getItem("user") || "{}"
   );
@@ -36,7 +44,39 @@ const Navbar = () => {
     setIsEmpty(isCustomerEmpty);
   }, [customer]);
 
-  console.log("Customer Details:", customer);
+
+
+  const handleCreateAccount = async(e: React.FormEvent) =>{
+    e.preventDefault()
+
+    const body = {
+      officerId,
+      accountType: accountType.toLowerCase(),
+    }
+
+    // console.log(body)
+
+    const {data, error} = await createAccount(body)
+    if(error){
+      console.log(error)
+      toast.error('Something Went Wrong')
+      return
+    }
+    
+    if(data.statusCode === 200){
+      setShowModal(false)
+       toast.success('Account Created Successfully')
+      window.location.reload()
+    }
+  }
+
+  const handleLogout = async(e: React.FormEvent) => {
+
+    e.preventDefault()
+
+    const {data, error} = logout(0)
+    console.log(data, error)
+  }
 
   return (
     <header className="py-4 md:py-6">
@@ -144,14 +184,14 @@ const Navbar = () => {
                       <h2 className="text-lg font-bold mb-4">
                         Create New Account
                       </h2>
-                      <form>
+                      <form onSubmit={(e)=> handleCreateAccount(e)}>
                         <div className="mb-4">
                           <label className="block text-sm font-medium text-gray-700">
                             Account Name
                           </label>
                           <input
                             type="text"
-                            value= {customer.firstName + " " + customer.lastName}
+                            value={customer.firstName + " " + customer.lastName}
                             disabled
                             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-[#041c64] focus:border-[#041c64] sm:text-sm"
                           />
@@ -161,20 +201,34 @@ const Navbar = () => {
                           <label className="block text-sm font-medium text-gray-700">
                             Account Type
                           </label>
-                          <select className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-[#041c64] focus:border-[#041c64] sm:text-sm">
+                          <select
+                            onChange={(e) => setAccountType(e.target.value)}
+                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-[#041c64] focus:border-[#041c64] sm:text-sm"
+                          >
+                            <option selected>Select Account Type</option>
                             <option>Savings</option>
                             <option>Current</option>
+                            <option>Corporate</option>
                           </select>
                         </div>
 
                         <div className="mb-4">
                           <label className="block text-sm font-medium text-gray-700">
-                            Initial Deposit
+                            Account Officer
                           </label>
-                          <input
-                            type="number"
+                          <select
+                            onChange={(e) => setOfficerId(e.target.value)}
                             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-[#041c64] focus:border-[#041c64] sm:text-sm"
-                          />
+                          >
+                            <option selected>Select Account Officer</option>
+                            {officers?.data?.map((officer) => {
+                              return (
+                                <option key={officer.id} value={officer.id}>
+                                  {officer.firstName + " " + officer.lastName}
+                                </option>
+                              );
+                            })}
+                          </select>
                         </div>
 
                         <div className="flex justify-end">
@@ -200,6 +254,7 @@ const Navbar = () => {
               <Link
                 to=""
                 title=""
+                onClick={(e) => handleLogout(e)}
                 className="px-5 py-2 text-base font-bold leading-7 text-white transition-all duration-200 bg-[#d4242b] border border-transparent rounded-xl hover:bg-gray-600 font-pj focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900"
                 role="button"
               >
