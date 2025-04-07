@@ -32,21 +32,27 @@ const Register = () => {
     const { data, error } = await register(body);
 
     if (error) {
-      toast.error(error?.data?.statusMessage);
-      return;
+      if (
+        "data" in error &&
+        (error.data as { statusMessage?: string }).statusMessage
+      ) {
+        return toast.error(
+          (error.data as { statusMessage?: string }).statusMessage
+        );
+      }
+
+      return toast.error("An unexpected error occurred");
     }
 
     if (data?.status == 409) {
       toast.error(data?.message);
       return;
     }
- 
 
-    if(data?.statusCode == 200){
+    if (data?.statusCode == 200) {
       // toast.success(data?.message);
       toast.success("Registration successful");
     }
-
 
     setTimeout(() => {
       navigate("/login");

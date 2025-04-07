@@ -30,10 +30,14 @@ const Login = () => {
 
       const {data, error}= await login(body)
 
-      if(error){
-        console.log(error)
+      if (error) {
+        console.log(error);
 
-       return toast.error(error?.data?.statusMessage)
+        if ('data' in error && (error.data as { statusMessage?: string }).statusMessage) {
+          return toast.error((error.data as { statusMessage?: string }).statusMessage);
+        }
+
+        return toast.error('An unexpected error occurred');
       }
 
       toast.success('Login successful')

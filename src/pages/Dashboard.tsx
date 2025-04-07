@@ -30,7 +30,7 @@ interface CustomerDetails {
 
 
 export default function Dashboard() {
-  const {data:accounts, error} = useFetchAccountsQuery(0)
+  const {data:accounts} = useFetchAccountsQuery(0)
   const [isEmpty, setIsEmpty] = React.useState(false);
   const [accountsToRender, setAccountsToRender] = React.useState<CustomerAccount[]>([])
   const customer: CustomerDetails = JSON.parse(

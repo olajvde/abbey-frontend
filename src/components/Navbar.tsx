@@ -1,5 +1,5 @@
-import React, { useEffect } from "react";
-import { Link, Navigate, useNavigate } from "react-router-dom";
+import React from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { useFetchOfficersQuery,useCreateAccountMutation } from "../api/accountsSlice";
 import { toast } from "sonner";
 import { useLogoutMutation } from "../api/authSlice";
@@ -35,7 +35,7 @@ const Navbar = () => {
   const [showModal, setShowModal] = React.useState(false);
   const [officerId, setOfficerId] = React.useState("");
   const [accountType, setAccountType] = React.useState("");
-  const { data: officers, isLoading } = useFetchOfficersQuery(0);
+  const { data: officers } = useFetchOfficersQuery(0);
   const customer: CustomerDetails = JSON.parse(
     sessionStorage.getItem("user") || "{}"
   );
@@ -78,7 +78,14 @@ const Navbar = () => {
     localStorage.removeItem('refresh_token')
     navigate('/login')
 
-    const {data, error} = logout(0)
+    const {data, error} = await logout(0)
+    
+    if(error){
+      console.log(error)
+      toast.error('Something Went Wrong')
+      return
+    }
+    
     console.log(data, error)
   }
 
@@ -225,7 +232,7 @@ const Navbar = () => {
                             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-[#041c64] focus:border-[#041c64] sm:text-sm"
                           >
                             <option selected>Select Account Officer</option>
-                            {officers?.data?.map((officer) => {
+                            {officers?.data?.map((officer: { id: string; firstName: string; lastName: string }) => {
                               return (
                                 <option key={officer.id} value={officer.id}>
                                   {officer.firstName + " " + officer.lastName}

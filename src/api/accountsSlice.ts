@@ -1,16 +1,14 @@
 import {
     createApi,
-    fetchBaseQuery,
-    BaseQueryApi,
+    fetchBaseQuery
   } from "@reduxjs/toolkit/query/react";
   import { baseurl, user_token } from "../constants";
   
   const thebase = fetchBaseQuery({
     baseUrl: baseurl, // Your API endpoint base URL
-    prepareHeaders: (headers: Headers, api: Pick<BaseQueryApi, "getState">) => {
+    prepareHeaders: (headers: Headers) => {
       // If the token exists, set it in the Authorization header
       if (user_token) {
-        // console.log("User token:", user_token);
         headers.set("Authorization", `Bearer ${user_token}`);
       }
   
