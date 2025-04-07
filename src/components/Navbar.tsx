@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import { useFetchOfficersQuery,useCreateAccountMutation } from "../api/accountsSlice";
 import { toast } from "sonner";
 import { useLogoutMutation } from "../api/authSlice";
@@ -28,6 +28,7 @@ interface CustomerDetails {
   customerAccounts: CustomerAccount[];
 }
 const Navbar = () => {
+  const navigate  = useNavigate()
   const [createAccount] = useCreateAccountMutation()
   const [logout] = useLogoutMutation()
   const [isEmpty, setIsEmpty] = React.useState(false);
@@ -73,6 +74,9 @@ const Navbar = () => {
   const handleLogout = async(e: React.FormEvent) => {
 
     e.preventDefault()
+    sessionStorage.clear()
+    localStorage.removeItem('refresh_token')
+    navigate('/login')
 
     const {data, error} = logout(0)
     console.log(data, error)
